@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepEval & RAGAS - Proposta de Implementação</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fbfd;
+            padding: 20px;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            margin: 0 auto 20px;
+            padding: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            page-break-after: always;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #eb5c90;
+        }
+
+        .logo {
+            width: 96px;
+            height: 90px;
+            background: #eb5c90;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 24px;
+        }
+
+        h1 {
+            color: #1a1a2e;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: #eb5c90;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            margin-top: 40px;
+        }
+
+        h3 {
+            color: #1a1a2e;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            margin-top: 30px;
+        }
+
+        h4 {
+            color: #eb5c90;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        p {
+            color: #4a4a5e;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: #6a6a7e;
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #eb5c90 0%, #d14876 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .hero-section h1 {
+            color: white;
+            font-size: 38px;
+            margin-bottom: 20px;
+        }
+
+        .hero-section p {
+            color: rgba(255,255,255,0.95);
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: #f9fbfd;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #eb5c90;
+        }
+
+        .feature-card h4 {
+            margin-top: 0;
+        }
+
+        .benefit-box {
+            background: linear-gradient(135deg, #f9fbfd 0%, #ffffff 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #eb5c90;
+        }
+
+        .metric-highlight {
+            background: #eb5c90;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .metric-highlight h3 {
+            color: white;
+            font-size: 48px;
+            margin: 0;
+        }
+
+        .metric-highlight p {
+            color: rgba(255,255,255,0.95);
+            font-size: 16px;
+            margin: 10px 0 0 0;
+        }
+
+        ul {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        ul li {
+            color: #4a4a5e;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        ul li:before {
+            content: "▸";
+            color: #eb5c90;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .comparison-table th {
+            background: #eb5c90;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #4a4a5e;
+            font-size: 13px;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9fbfd;
+        }
+
+        .cta-section {
+            background: #1a1a2e;
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .cta-section h2 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 30px 0;
+        }
+
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #eb5c90;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #eb5c90;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #eb5c90;
+        }
+
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .roi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(235, 92, 144, 0.1);
+        }
+
+        .roi-card h3 {
+            color: #eb5c90;
+            font-size: 36px;
+            margin: 0 0 10px 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            text-align: center;
+            color: #8a8a9e;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Página 2: Contexto e Desafios -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">AI</div>
+            <span style="color: #8a8a9e; font-size: 14px;">Contexto Atual</span>
+        </div>
+        
+        <h2>O Desafio da Avaliação em IA Generativa</h2>
+        
+        <p style="font-size: 16px; margin-bottom: 30px;">Sistemas baseados em LLMs apresentam desafios únicos que métodos tradicionais de teste não conseguem endereçar adequadamente.</p>
+        
+        <h3>Limitações Atuais</h3>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Testes Manuais</h4>
+                <p>Demorados, caros, não-escaláveis e sujeitos a viés humano. Impossível cobrir todos os cenários.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>Falta de Métricas</h4>
+                <p>Ausência de KPIs objetivos para medir qualidade, alucinação, relevância e fidelidade das respostas.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>Comparação de Modelos</h4>
+                <p>Dificuldade para avaliar trade-offs entre diferentes LLMs, prompts e configurações de forma sistemática.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h4>Sistemas RAG</h4>
+                <p>Impossível identificar se falhas vêm da recuperação, da base de conhecimento ou da geração.</p>
+            </div>
+        </div>
+        
+        <h3>Impacto nos Negócios</h3>
+        
+        <ul>
+            <li><strong>Tempo desperdiçado</strong> em debugging e correções reativas sem visibilidade clara do problema</li>
+            <li><strong>Custos elevados</strong> por não conseguir comparar modelos e otimizar escolhas</li>
+            <li><strong>Risco de qualidade</strong> em produção sem testes sistemáticos e reproduzíveis</li>
+            <li><strong>Falta de confiança</strong> dos stakeholders em sistemas de IA devido à imprevisibilidade</li>
+            <li><strong>Dificuldade de evolução</strong> contínua sem baseline claro para medir melhorias</li>
+        </ul>
+        
+        <div class="metric-highlight">
+            <h3>Grande Parcela</h3>
+            <p>do tempo de desenvolvimento em projetos de IA é gasto em avaliação manual e debugging sem ferramentas adequadas</p>
+        </div>
+    </div>
+
+    <!-- Página 3: DeepEval -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">AI</div>
+            <span style="color: #8a8a9e; font-size: 14px;">DeepEval</span>
+        </div>
+        
+        <h2>DeepEval</h2>
+        <p class="subtitle">Framework Completo de Avaliação para LLMs</p>
+        
+        <p style="font-size: 15px; margin-bottom: 35px;"><strong>DeepEval</strong> é uma plataforma moderna e extensível projetada para avaliar, comparar e evoluir sistemas baseados em LLMs com rigor técnico e escalabilidade empresarial.</p>
+        
+        <h3>Principais Capacidades</h3>
+        
+        <div class="benefit-box">
+            <h4>1. Arena de Comparação de Modelos</h4>
+            <p>Compare múltiplos modelos, prompts e pipelines lado a lado com métricas objetivas.</p>
+            <ul>
+                <li>Avaliação A/B ou N-way entre GPT-4, Claude, Llama, Mistral e modelos fine-tuned</li>
+                <li>Análise de trade-offs: qualidade vs. custo vs. latência vs. consistência</li>
+                <li>Suporte a RAG, agentes e ferramentas externas</li>
+            </ul>
+        </div>
+        
+        <div class="benefit-box">
+            <h4>2. Test Cases Sintéticos Multi-Turn</h4>
+            <p>Geração automatizada de diálogos completos com contexto acumulado e dependências entre mensagens.</p>
+            <ul>
+                <li>Simulação de usuários reais com ambiguidades e mudanças de intenção</li>
+                <li>Cobertura de edge cases raramente presentes em dados históricos</li>
+                <li>Testes de memória conversacional e coerência</li>
+            </ul>
+        </div>
+        
+        <div class="benefit-box">
+            <h4>3. Geração de Goldens a partir de Documentos</h4>
+            <p>Criação automática de respostas de referência diretamente da base de conhecimento.</p>
+            <ul>
+                <li>Análise de PDFs e documentos corporativos</li>
+                <li>Geração de perguntas e respostas esperadas alinhadas ao conteúdo</li>
+                <li>Eliminação do trabalho manual de criar datasets de avaliação</li>
+            </ul>
+        </div>
+        
+        <div class="benefit-box">
+            <h4>4. Métricas Personalizadas</h4>
+            <p>Framework extensível para criar métricas que refletem exatamente os KPIs do negócio.</p>
+            <ul>
+                <li>Compliance e aderência a políticas internas</li>
+                <li>Qualidade de reasoning e grau de alucinação</li>
+                <li>Tom, estilo, persona e regras de domínio específico</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Página 4: RAGAS -->
+    <div class="page">
+        <div class="header">
+            <div class="logo">AI</div>
+            <span style="color: #8a8a9e; font-size: 14px;">RAGAS</span>
+        </div>
+        
+        <h2>RAGAS</h2>
+        <p class="subtitle">Avaliação Profunda para Sistemas RAG</p>
+        
+        <p style="font-size: 15px; margin-bottom: 35px;"><strong>RAGAS</strong> (Retrieval-Augmented Generation Assessment) é especializado em avaliar, validar e otimizar sistemas RAG com precisão científica, analisando todo o fluxo de conhecimento.</p>
+        
+        <h3>Principais Capacidades</h3>
+        
+        <div class="benefit-box">
+            <h4>1. Estruturação e Validação de Knowledge Bases</h4>
+            <p>Trata a base de conhecimento como ativo central, não como detalhe técnico.</p>
+            <ul>
+                <li>Avaliação de qualidade dos documentos antes da produção</li>
+                <li>Análise de cobertura, redundância e granularidade</li>
+                <li>Otimização de chunking e indexação</li>
+                <li>Detecção de lacunas e conteúdo irrelevante</li>
+            </ul>
+            <!-- <p style="margin-top: 15px;"><strong>Valor:</strong> Redução de até 50% em alucinações através de bases otimizadas.</p> -->
+        </div>
+        
+        <div class="benefit-box">
+            <h4>2. Testes de RAG com Precisão Extrema</h4>
+            <p>Avaliação isolada e conjunta de cada etapa do pipeline RAG.</p>
+            <ul>
+                <li>Qualidade da recuperação (retriever)</li>
+                <li>Relevância do contexto recuperado</li>
+                <li>Fidelidade da resposta ao conteúdo</li>
+                <li>Uso efetivo da informação pelo modelo</li>
+            </ul>
+            <!-- <p style="margin-top: 15px;"><strong>Valor:</strong> Identificação exata da origem dos erros, eliminando "tentativas no escuro".</p> -->
+        </div>
+        
+        <div class="benefit-box">
+            <h4>3. Métricas Especializadas Reconhecidas</h4>
+            <p>Suite completa de métricas desenhadas especificamente para RAG.</p>
+            <ul>
+                <li><strong>Context Precision:</strong> quanto do contexto é realmente relevante</li>
+                <li><strong>Context Recall:</strong> se recupera toda informação necessária</li>
+                <li><strong>Faithfulness:</strong> fidelidade ao contexto fornecido</li>
+                <li><strong>Answer Relevancy:</strong> se responde corretamente à pergunta</li>
+            </ul>
+            <!-- <p style="margin-top: 15px;"><strong>Valor:</strong> Avaliações quantitativas rigorosas para ambientes regulados e missão crítica.</p> -->
+        </div>
+        
+        <div class="benefit-box">
+            <h4>4. Test Sets Sintéticos Orientados a Conhecimento</h4>
+            <p>Geração automática de datasets baseados na knowledge base.</p>
+            <ul>
+                <li>Perguntas realistas a partir dos documentos</li>
+                <li>Cenários difíceis e edge cases</li>
+                <li>Cobertura sistemática de todo conhecimento disponível</li>
+            </ul>
+            <!-- <p style="margin-top: 15px;"><strong>Valor:</strong> Testes que refletem fielmente o conteúdo real do sistema.</p> -->
+        </div>
+    </div>    
+</body>
